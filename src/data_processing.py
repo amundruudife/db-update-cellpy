@@ -89,7 +89,10 @@ def check_duplicates(filtered_df, db_path, target_sheet, unique_key_col, key_col
         # Get existing keys from column A (index 0)
         existing_keys = set()
         if len(existing_df) > 0 and len(existing_df.columns) > key_col_index:
-            existing_keys = set(existing_df.iloc[:, key_col_index].dropna().astype(str))
+            # Bug fix: Don't convert to string, preserve original data types
+            # This ensures accurate comparison, especially for numeric keys
+            existing_keys_series = existing_df.iloc[:, key_col_index].dropna()
+            existing_keys = set(existing_keys_series.tolist())
         
         logger.info(f"Found {len(existing_keys)} existing keys in database")
         
@@ -99,9 +102,24 @@ def check_duplicates(filtered_df, db_path, target_sheet, unique_key_col, key_col
         if source_key_col_name is None:
             raise ValueError(f"Key column index {key_col_index} is out of range in source data")
         
-        # Check for duplicates
-        source_keys = filtered_df[source_key_col_name].astype(str)
-        duplicate_mask = source_keys.isin(existing_keys)
+        # Check for duplicates - preserve data types for accurate comparison
+        source_keys = filtered_df[source_key_col_name]
+        
+        # Bug fix: Handle potential type mismatches between source and database
+        # Convert both to the same type only if necessary
+        duplicate_mask = pd.Series([False] * len(source_keys), index=source_keys.index)
+        
+        for idx, key in source_keys.items():
+            if pd.notna(key):  # Skip NaN values
+                # Check if key exists, handling potential type differences
+                if key in existing_keys:
+                    duplicate_mask[idx] = True
+                elif isinstance(key, (int, float)):
+                    # Check for numeric equivalence (e.g., 1.0 == 1)
+                    for existing_key in existing_keys:
+                        if isinstance(existing_key, (int, float)) and key == existing_key:
+                            duplicate_mask[idx] = True
+                            break
         
         new_rows_df = filtered_df[~duplicate_mask].copy()
         duplicate_keys = source_keys[duplicate_mask].tolist()
@@ -112,7 +130,7 @@ def check_duplicates(filtered_df, db_path, target_sheet, unique_key_col, key_col
         logger.info(f"  Duplicate rows skipped: {len(duplicate_keys)}")
         
         if duplicate_keys:
-            logger.warning(f"Skipping duplicate keys: {duplicate_keys}")
+            logger.warning(f"Skipping duplicate keys: {duplicate_keys[:10]}{'...' if len(duplicate_keys) > 10 else ''}")
         
         return new_rows_df, duplicate_keys
         

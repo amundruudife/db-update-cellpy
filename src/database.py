@@ -39,6 +39,7 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
         logger.info(f"DRY RUN: Would append {len(new_rows_df)} rows to {target_sheet}")
         return len(new_rows_df)
     
+    wb = None
     try:
         # For the cellpy database format, we need to handle this carefully
         # The database has a complex multi-header structure that must be preserved
@@ -76,7 +77,6 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
         
         # Save the workbook
         wb.save(db_path)
-        wb.close()
         
         logger.info(f"Successfully appended {rows_added} rows to {target_sheet}")
         return rows_added
@@ -84,6 +84,10 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
     except Exception as e:
         logger.error(f"Error updating slurry sheet: {e}")
         raise
+    finally:
+        # Bug fix: Always close the workbook to prevent resource leaks
+        if wb is not None:
+            wb.close()
 
 def dry_run_full_pipeline(config):
     """
