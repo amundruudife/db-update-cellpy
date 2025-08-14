@@ -25,6 +25,7 @@ from src.logging_utils import setup_logging, get_logger
 from src.file_operations import copy_log_sheet, backup_db
 from src.data_processing import filter_by_projects, check_duplicates, prepare_update_data
 from src.database import update_slurry, dry_run_full_pipeline
+from src.common_utils import generate_project_summary
 import src.copy_sharepoint_file as copy_sharepoint_file
 
 def get_fresh_source_data():
@@ -90,8 +91,7 @@ def run_live_pipeline(config):
         )
         
         # Final summary
-        project_summary = new_rows_df.iloc[:, 2].value_counts().to_dict() if len(new_rows_df) > 0 else {}
-        summary_text = ", ".join([f"{proj}:{count}" for proj, count in project_summary.items()])
+        _, summary_text = generate_project_summary(new_rows_df)
         
         logger.info("=" * 50)
         logger.info("DATABASE UPDATE COMPLETED SUCCESSFULLY")

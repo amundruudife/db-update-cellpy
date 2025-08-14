@@ -12,6 +12,7 @@ import shutil
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
+from .common_utils import ensure_directory
 
 def copy_cell_log_to_source_data():
     """
@@ -56,7 +57,7 @@ def copy_cell_log_to_source_data():
     
     try:
         # Create source_data directory if needed
-        destination.parent.mkdir(parents=True, exist_ok=True)
+        ensure_directory(destination.parent)
         
         print(f"\n📋 Extracting 'log' sheet from: {newest_file.name}")
         

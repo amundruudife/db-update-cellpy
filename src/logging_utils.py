@@ -7,6 +7,7 @@ This module handles logging setup and configuration.
 
 import logging
 from pathlib import Path
+from functools import wraps
 
 # Logging constants
 LOG_FILE = "update_log.txt"
@@ -60,4 +61,27 @@ def get_logger():
         logging.Logger: Current logger instance
     """
     global logger
-    return logger 
+    return logger
+
+def log_exceptions(error_message_template):
+    """
+    Decorator to handle common exception logging pattern.
+    
+    Args:
+        error_message_template (str): Template for error message, can include {e} for exception
+    
+    Returns:
+        Decorator function
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logger = get_logger()
+                if logger:
+                    logger.error(error_message_template.format(e=e))
+                raise
+        return wrapper
+    return decorator 
