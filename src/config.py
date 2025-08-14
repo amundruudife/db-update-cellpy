@@ -6,6 +6,7 @@ This module handles loading and validating configuration from JSON files.
 """
 
 import json
+import os
 from pathlib import Path
 
 # Configuration constants
@@ -27,7 +28,20 @@ def load_config(config_path=CONFIG_FILE):
         ValueError: If required config fields are missing
     """
     try:
-        config_file = Path(config_path)
+        # Security fix: Prevent path traversal attacks
+        config_file = Path(config_path).resolve()
+        
+        # Ensure the config file is within the current working directory or its subdirectories
+        cwd = Path.cwd().resolve()
+        try:
+            config_file.relative_to(cwd)
+        except ValueError:
+            raise ValueError(f"Configuration file must be within the workspace directory: {config_path}")
+        
+        # Also check for suspicious patterns
+        if ".." in str(config_path) or config_path.startswith("/"):
+            raise ValueError(f"Invalid configuration path: {config_path}")
+        
         if not config_file.exists():
             raise FileNotFoundError(f"Configuration file not found: {config_path}")
         
