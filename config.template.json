@@ -1,0 +1,12 @@
+{
+  "projects": ["Project-A", "Project-B", "Project-C", "Project-D", "Project-E"],
+  "source_path": "/path/to/your/project/source_data/Cell_Log.xlsx",
+  "work_dir": "/path/to/your/project",
+  "db_path": "/path/to/your/database/Cell_Analysis_db.xlsx",
+  "sheet_to_copy": "log",
+  "target_sheet": "Slurry",
+  "unique_key_col": "A",
+  "logging_format": "[{timestamp}] {message}",
+  "dry_run": true,
+  "auto_backup": true
+} 
