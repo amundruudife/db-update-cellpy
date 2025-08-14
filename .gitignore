@@ -34,6 +34,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.cursor/
 
 # IDEs and editors
 .vscode/
