@@ -1,0 +1,77 @@
+# Cell Analysis Database Auto-Update System - Git Ignore Rules
+
+# CRITICAL: Protect sensitive configuration and data files
+config.json                    # Contains local file paths - user must create from template
+update_log.txt                # Contains execution logs with potentially sensitive info
+
+# CRITICAL: Protect all real data files
+source_data/Cell_Log.xlsx      # Real production data file
+source_data/*_cellog_*.xlsx    # Versioned copies of real data
+
+# CRITICAL: Protect output directory (contains backups and dry-run results)
+output/                        # All dry-run outputs and backups
+*.bak.xlsx                     # Database backup files (anywhere)
+
+# Python cache and temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Windows
+*.lnk
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls 
