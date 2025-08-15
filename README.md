@@ -42,6 +42,50 @@ This system automates the process of copying the Cell_Log.xlsx file, filtering d
    - Use the provided `source_data/sample_Cell_Log.xlsx` and `source_data/sample_database.xlsx` for initial testing
    - Update your `config.json` to point to these sample files
 
+## 📋 **Proper Source Data Management**
+
+### **⚠️ Important: Working with Real Data**
+
+When you have real cell analysis data to process:
+
+1. **Add your data rows** to the Cell_Log.xlsx "log" sheet  
+2. **Ensure Project column** contains your configured project names (case-sensitive)
+3. **Save the file** - the system will auto-fetch from SharePoint Downloads
+4. **Run the updater**: `python main.py`
+
+### **🚨 Data Guidelines**
+
+**DO:**
+- ✅ Only add **real experimental data** that belongs in the database
+- ✅ Use **actual project names** from your `config.json`
+- ✅ Test with **dry-run mode first**: `python main.py --dry-run`
+
+**DON'T:**
+- ❌ Add fake/test data like "CELL001", "NEWCELL001", etc.
+- ❌ Use made-up cell IDs for testing system functionality  
+- ❌ Put test data in the production database
+
+### **📊 Example of Real Data Entry**
+
+```
+UniqueID: ABC123
+BatchNumber: BATCH2025_01  
+Project: YourProject1
+TestDate: 2025-01-14
+Capacity_mAh: 2850
+Voltage_V: 3.72
+Temperature_C: 25
+Notes: First production run
+```
+
+### **🔄 Typical Workflow**
+
+1. **Conduct cell analysis experiments**
+2. **Record results** in Cell_Log.xlsx (or download from SharePoint)
+3. **Run dry-run mode** to preview changes: `python main.py --dry-run`  
+4. **Check output folder** for results preview
+5. **Switch to live mode** to update database: `python main.py --live`
+
 ### **Step 1: Get Latest Source Data**
 
 **Option A: Manual Process**
@@ -280,7 +324,6 @@ cell-analysis-db-update/
 ├── config.template.json        # Configuration template
 ├── requirements.txt            # Dependencies  
 ├── README.md                   # This file
-├── GITHUB_PUBLICATION_PLAN.md  # Publication plan documentation
 ├── .gitignore                  # Git ignore rules
 ├── src/                        # Source code modules
 │   ├── __init__.py             # Package initialization
