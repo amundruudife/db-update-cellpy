@@ -63,29 +63,6 @@ def load_config(config_path=CONFIG_FILE):
         if not Path(config['work_dir']).exists():
             raise ValueError(f"Work directory does not exist: {config['work_dir']}")
         
-        # Always auto-fetch fresh SharePoint data (restore old behavior)
-        print("Fetching fresh data from SharePoint...")
-        
-        try:
-            # Import here to avoid circular imports
-            from . import copy_sharepoint_file
-            success = copy_sharepoint_file.copy_cell_log_to_source_data()
-            
-            if success:
-                print("✅ Successfully fetched fresh data from SharePoint")
-            else:
-                # If SharePoint fetch fails, check if we have an existing file to fall back to
-                if not Path(config['source_path']).exists():
-                    raise ValueError(f"SharePoint auto-fetch failed and no existing source file found: {config['source_path']}")
-                else:
-                    print("⚠️ SharePoint fetch failed, using existing source file")
-        except Exception as e:
-            # If SharePoint fetch fails, check if we have an existing file to fall back to
-            if not Path(config['source_path']).exists():
-                raise ValueError(f"SharePoint auto-fetch failed and no existing source file found: {config['source_path']} (Error: {e})")
-            else:
-                print(f"⚠️ SharePoint fetch failed, using existing source file (Error: {e})")
-        
         if not Path(config['db_path']).exists():
             raise ValueError(f"Database file does not exist: {config['db_path']}")
         
