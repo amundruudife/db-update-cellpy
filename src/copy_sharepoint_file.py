@@ -25,20 +25,23 @@ def copy_cell_log_to_source_data():
     
     print("🔍 Looking for Cell_Log.xlsx in Downloads...")
     
-    # Check Downloads folder
+    # Candidate locations: synced SharePoint folder first, then Downloads
+    sharepoint_folder = Path.home() / "Institutt for Energiteknikk" / "Users of IFE Battery Lab - 03_BaDeLab"
     downloads_folder = Path.home() / "Downloads"
-    
-    if not downloads_folder.exists():
-        print(f"❌ Downloads folder not found: {downloads_folder}")
-        return False
-    
-    # Find Cell_Log files
-    cell_log_files = list(downloads_folder.glob("Cell_Log*.xlsx"))
+    cell_log_files = []
+
+    for folder in [sharepoint_folder, downloads_folder]:
+        if folder.exists():
+            matches = list(folder.glob("Cell_Log*.xlsx"))
+            cell_log_files.extend(matches)
+        else:
+            print(f"ℹ️  Skipping missing folder: {folder}")
     
     if not cell_log_files:
-        print("❌ No Cell_Log*.xlsx files found in Downloads")
+        print("❌ No Cell_Log*.xlsx files found in SharePoint sync folder or Downloads")
+        print(f"   Checked: {sharepoint_folder}")
         print(f"   Checked: {downloads_folder}")
-        print("   💡 Download Cell_Log.xlsx from SharePoint first")
+        print("   💡 Ensure the file is synced or downloaded locally")
         return False
     
     # Find the newest file
@@ -51,6 +54,8 @@ def copy_cell_log_to_source_data():
     print(f"✅ Found: {newest_file.name}")
     print(f"   Size: {file_size} bytes")
     print(f"   Age: {file_age_hours:.1f} hours")
+    if file_age_hours > 24:
+        print("⚠️  Warning: Downloads file is older than 24 hours - may be stale. Download a fresh copy from SharePoint.")
     
     # Destination file
     destination = Path("source_data/Cell_Log.xlsx")
@@ -65,6 +70,20 @@ def copy_cell_log_to_source_data():
         try:
             log_df = pd.read_excel(newest_file, sheet_name='log')
             print(f"   ✅ Read 'log' sheet: {len(log_df)} rows, {len(log_df.columns)} columns")
+            # Compute max key to surface stale sources quickly
+            max_key = pd.to_numeric(log_df.iloc[:, 0], errors='coerce').max()
+            print(f"   🔑 Max key detected: {max_key}")
+            
+            # Debug: Check for file_name_indicator column
+            cols_with_file = [col for col in log_df.columns if 'file' in str(col).lower()]
+            if cols_with_file:
+                print(f"   📋 Columns containing 'file': {cols_with_file}")
+            else:
+                print(f"   ⚠️  No columns containing 'file' found")
+                
+            # Debug: Show first few column names
+            print(f"   📋 First 10 columns: {list(log_df.columns[:10])}")
+            
         except ValueError as e:
             if "Worksheet named 'log'" in str(e):
                 print("   ❌ No 'log' sheet found in Excel file")

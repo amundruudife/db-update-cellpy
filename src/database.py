@@ -49,7 +49,8 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
         # Read the current database structure
         wb = load_workbook(db_path)
         
-        if target_sheet not in wb.sheetnames:
+        original_sheets = set(wb.sheetnames)
+        if target_sheet not in original_sheets:
             raise ValueError(f"Target sheet '{target_sheet}' not found in database")
         
         ws = wb[target_sheet]
@@ -80,6 +81,12 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
         # Save the workbook
         wb.save(db_path)
         
+        # Safety: ensure no new sheets were created (e.g., db_table)
+        if set(wb.sheetnames) != original_sheets:
+            raise ValueError(
+                f"Unexpected new sheets created: {set(wb.sheetnames) - original_sheets}"
+            )
+        
         logger.info(f"Successfully appended {rows_added} rows to {target_sheet}")
         return rows_added
         
@@ -105,6 +112,8 @@ def dry_run_full_pipeline(config):
     
     results = {
         'copied_file': None,
+        'source_rows': 0,
+        'source_max_key': None,
         'filtered_rows': 0,
         'duplicate_rows': 0,
         'appended_rows': 0,
@@ -127,6 +136,8 @@ def dry_run_full_pipeline(config):
     
     # Populate results from the preparation step
     results['copied_file'] = Path(prep_results['copied_file_path']).name
+    results['source_rows'] = prep_results.get('source_rows', 0)
+    results['source_max_key'] = prep_results.get('source_max_key')
     results['filtered_rows'] = len(prep_results['filtered_df'])
     results['duplicate_rows'] = len(prep_results['duplicate_keys'])
     results['appended_rows'] = len(new_rows_df)
@@ -169,6 +180,8 @@ def dry_run_full_pipeline(config):
     logger.info("=" * 60)
     logger.info("DRY RUN PIPELINE COMPLETED SUCCESSFULLY")
     logger.info(f"Source file copied: {results['copied_file']}")
+    logger.info(f"Source rows read: {results['source_rows']}")
+    logger.info(f"Source max key: {results['source_max_key']}")
     logger.info(f"Rows filtered by projects: {results['filtered_rows']}")
     logger.info(f"Duplicate rows skipped: {results['duplicate_rows']}")
     logger.info(f"New rows appended: {results['appended_rows']} ({summary_text})")

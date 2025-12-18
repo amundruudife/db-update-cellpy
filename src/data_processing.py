@@ -12,7 +12,14 @@ from .file_operations import copy_log_sheet
 from .common_utils import read_excel_with_cellpy_format, read_excel_raw, validate_file_path
 
 @log_exceptions("Error filtering by projects: {e}")
-def filter_by_projects(copied_file_path, sheet_name, projects, project_col_index=2):
+def filter_by_projects(
+    copied_file_path,
+    sheet_name,
+    projects,
+    project_col_index=2,
+    return_source_rows=False,
+    return_source_max_key=False,
+):
     """
     Filter data from copied file by project list.
     
@@ -33,8 +40,12 @@ def filter_by_projects(copied_file_path, sheet_name, projects, project_col_index
     
     # Read the Excel file - skip the first 4 header rows for cellpy format
     df = read_excel_with_cellpy_format(copied_file_path, sheet_name)
+    source_rows = len(df)
+    source_max_key = pd.to_numeric(df.iloc[:, 0], errors='coerce').max() if len(df) else None
     
-    logger.info(f"Read {len(df)} rows from {sheet_name} sheet (after skipping headers)")
+    logger.info(f"Read {source_rows} rows from {sheet_name} sheet (after skipping headers)")
+    if return_source_max_key:
+        logger.info(f"Detected source max key: {source_max_key}")
     
     # Filter by projects (case-sensitive exact match)
     project_col_name = df.columns[project_col_index] if project_col_index < len(df.columns) else None
@@ -50,6 +61,8 @@ def filter_by_projects(copied_file_path, sheet_name, projects, project_col_index
     for project, count in project_counts.items():
         logger.info(f"  {project}: {count} rows")
     
+    if return_source_rows or return_source_max_key:
+        return filtered_df, source_rows, source_max_key
     return filtered_df
 
 @log_exceptions("Error checking duplicates: {e}")
@@ -142,10 +155,12 @@ def prepare_update_data(config):
     
     # Step 2: Filter data by projects
     logger.info("Step 2: Filtering data by projects...")
-    filtered_df = filter_by_projects(
+    filtered_df, source_rows, source_max_key = filter_by_projects(
         copied_file_path, 
         config['sheet_to_copy'], 
-        config['projects']
+        config['projects'],
+        return_source_rows=True,
+        return_source_max_key=True,
     )
     
     # Step 3: Check for duplicates
@@ -162,4 +177,6 @@ def prepare_update_data(config):
         'filtered_df': filtered_df,
         'new_rows_df': new_rows_df,
         'duplicate_keys': duplicate_keys,
+        'source_rows': source_rows,
+        'source_max_key': source_max_key,
     } 

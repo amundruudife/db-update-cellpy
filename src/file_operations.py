@@ -50,10 +50,18 @@ def copy_log_sheet(source_path, work_dir):
             break
         version += 1
     
-    # Copy the file
-    shutil.copy2(source_file, dest_path)
+    # Copy only the 'log' sheet to avoid unnecessary data
+    try:
+        import pandas as pd
+        log_df = pd.read_excel(source_file, sheet_name='log')
+        log_df.to_excel(dest_path, sheet_name='log', index=False)
+        logger.info(f"Source file copied to source_data/ (log sheet only): {filename}")
+    except Exception as e:
+        # Fallback to full file copy if extraction fails
+        logger.warning(f"Failed to extract log sheet, copying full file: {e}")
+        shutil.copy2(source_file, dest_path)
+        logger.info(f"Source file copied to source_data/: {filename}")
     
-    logger.info(f"Source file copied to source_data/: {filename}")
     return str(dest_path)
 
 @log_exceptions("Error creating backup: {e}")
