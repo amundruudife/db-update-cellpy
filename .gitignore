@@ -1,3 +1,30 @@
+# --- DATA ISOLATION START ---
+# Block all common data directories
+data/
+source_data/
+raw/
+processed/
+output/
+graphify-out/
+
+# Block all common data formats
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.xlsm
+*.bak
+*.tmp
+*.zip
+*.tar.gz
+*.7z
+
+# Block IDE-specific data/rule files
+.cursor/
+.cursor/rules/
+.cursor/plans/
+# --- DATA ISOLATION END ---
+
 # Cell Analysis Database Auto-Update System - Git Ignore Rules
 
 # CRITICAL: Protect sensitive configuration and data files
