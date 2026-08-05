@@ -9,6 +9,8 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from openpyxl import load_workbook
+from .contracts import is_production_database
+from .exceptions import LegacyWorkflowDisabledError, ProductionWriteBlockedError
 from .logging_utils import get_logger, log_exceptions
 from .file_operations import BACKUP_TIMESTAMP_FORMAT, backup_db
 from .common_utils import ensure_directory, generate_project_summary
@@ -31,6 +33,12 @@ def update_slurry(new_rows_df, db_path, target_sheet, dry_run=False):
         PermissionError: If unable to write to database
         ValueError: If data format doesn't match
     """
+    if is_production_database(db_path):
+        raise ProductionWriteBlockedError(
+            "Legacy update_slurry cannot target the production database. "
+            "Production writes require the future guarded transaction."
+        )
+
     logger = get_logger()
     
     if len(new_rows_df) == 0:
@@ -106,6 +114,11 @@ def dry_run_full_pipeline(config):
     Returns:
         dict: Execution results summary
     """
+    raise LegacyWorkflowDisabledError(
+        "The legacy config/filter/append pipeline is retired. "
+        "Use the replacement validation-only workflow when implemented."
+    )
+
     from .data_processing import prepare_update_data
     
     logger = get_logger()
@@ -191,4 +204,4 @@ def dry_run_full_pipeline(config):
     logger.info("✅ All files saved to output/ folder - production database unchanged")
     logger.info("=" * 60)
     
-    return results 
+    return results

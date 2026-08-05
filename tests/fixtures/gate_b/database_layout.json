@@ -1,0 +1,8 @@
+{
+  "sheet": "db_table",
+  "data_start_row": 3,
+  "columns": ["id", "batch_number", "batch", "exists", "exists_txt", "b01", "b02", "b03", "b04", "b05", "b06", "b07", "nom_cap_specifics", "area", "mass_active_material", "nominal_capacity", "loading_active_material", "cell_type", "tester", "instrument", "group", "project", "label", "experiment_type", "selected", "cell", "file_name_indicator", "materials_used", "slurry_name", "comment_one", "comment_two", "comment_three", "comment_slurry", "finished", "freeze", "boolean flag 01", "boolean flag 02", "boolean flag 03", "boolean flag 04", "boolean flag 05", "boolean flag 06", "boolean flag 07", "boolean flag 08", "boolean flag 09", "boolean flag 10", "boolean flag 11", "boolean flag 12", "boolean flag 13", "channel", "cell_design", "separator", "electrolyte", "mass_total", "active_material_mass_fraction", "pasting_thickness", "solvent_solid_ratio", "schedule", "comment_cell", "comment_general", "missing_raw", "inactive_additive_mass", "temperature", "cellpy_file_name", "raw_file_names", "formation", "material field 01", "material field 02", "material field 03", "material field 04", "material field 05", "material field 06", "material field 07", "db_comment"],
+  "existing_by_id": {
+    "101": {"id": 101, "b01": "keep-b01", "tester": "tester-101", "comment_one": "keep-comment"}
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "contract": "Gate B draft golden artifact",
+  "target_column_count": 73,
+  "source_row_for_db_row_3": 4,
+  "approved_formula_templates": {
+    "A": "=Slurry!A{source_row}",
+    "Z": "=Slurry!C{source_row}",
+    "AA": "=Slurry!D{source_row}",
+    "AW": "=Slurry!B{source_row}",
+    "BE": "=Slurry!L{source_row}"
+  },
+  "approved_system_values": {"D": 1, "T": "arbin_sql_h5", "X": "cycling"},
+  "golden_existing_id_101": {
+    "id": 101,
+    "b01": "keep-b01",
+    "tester": "tester-101",
+    "comment_one": "keep-comment"
+  },
+  "golden_new_id_202": {"id": 202}
+}

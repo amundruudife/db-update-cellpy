@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Graphify"
+  short_description: "Run the repository Graphify refresh with low-cost defaults"
+  default_prompt: "Refresh this repository Graphify outputs using the project-local low-cost workflow."

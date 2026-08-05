@@ -1,0 +1,11 @@
+{
+  "sheet": "c&p",
+  "header_row": 2,
+  "units_row": 3,
+  "first_data_row": 4,
+  "columns": ["key", "channel", "cell label", "file name", "active material working electrode (g)", "active material counter electrode (g)", "assumed capacity working electrode (Ah/g)", "assumed capacity counter electrode (Ah/g)", "max C rate", "counter electrode mode", "max current (mA)", "test schedule", "R1", "R2/HR", "R3/MR", "R4/LR", "helper_q", "helper_r", "helper_s"],
+  "rows": [
+    [101, "C1", "cell-101", "raw-101", 0.012, 0.013, 3.2, 3.1, 1, "Li", 10, "C/10", 1, 2, 3, 4, "q", "r", "s"],
+    [202, "C2", "cell-202", null, null, 0.014, null, 3.0, null, "Li", null, null, null, null, null, null, null, null, null]
+  ]
+}

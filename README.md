@@ -1,85 +1,47 @@
-# Cell Analysis DB Update (lean)
+# Cell Log to Cellpy Database Updater
 
-Minimal pipeline: copy fresh `Cell_Log.xlsx`, filter by project, skip duplicates already in Slurry, and append new rows. Stage-only is the default to keep production safe.
+This repository currently provides a deliberately small interim candidate-only slice for the legacy local `log` workflow. It reads a local legacy log workbook, keeps the fixed project filter, appends new IDs to existing `Slurry`, appends minimal `db_table` rows, preserves all existing `db_table` cells including `b01:b07`, and writes a separate candidate workbook and optional report.
 
-## Overview
+## Current status
 
-```mermaid
-flowchart LR
-    downloads[Downloads/Cell_Log.xlsx] --> copyStep[copy_log_sheet]
-    copyStep --> sourceFile[source_data/Cell_Log.xlsx]
-    sourceFile --> prep[Filter by projects + dedupe]
-    prep --> stage[output/dryrun_*.xlsx]
-    stage -->|--apply| prod[Cell_Analysis_db.xlsx]
+The usable candidate command is:
+
+```powershell
+python main.py candidate --source <source.xlsx> --database <non-production-copy.xlsx> --output <candidate.xlsx> [--report <candidate.json>]
 ```
 
-```mermaid
-flowchart TD
-    start[Start] --> mode{Mode}
-    mode -->|--maintenance| m1[Cleanup output/source copies/caches]
-    mode -->|default stage| s1[Copy db to output]
-    s1 --> s2[Copy log sheet -> filter -> dedupe]
-    s2 --> s3[Write staged output db]
-    mode -->|--apply| a1[Apply staged output]
-    a1 --> a2[Optional backup]
-    a2 --> a3[Copy staged db to production]
+Included source projects are fixed in code: `SIS-Larger`, `SIS-Large`, `CellMap`, `Norse-HV`, `SUMBAT-SP5`, `SUMBAT`, and `ASAP`.
+
+For each new ID, the candidate appends the source row to `Slurry` and a minimal `db_table` row containing only: column `A` = the literal ID, `D` (`exists`) = `1`, `T` (`instrument`) = `arbin_sql_h5`, and `X` (`experiment_type`) = `cycling`. All other new `db_table` cells are blank; no formulas are added. Existing rows and cells are preserved, including `b01:b07`.
+
+The source workbook and starting database copy are untouched. The exact production workbook (`C:\Users\IFE13213\cellpy_data\db\2025_Cell_Analysis_db_001.xlsx`) is rejected as an input or output, in-place output is rejected, and production replacement is unavailable. Legacy flags such as `--apply`, `--config`, `--skip-sharepoint`, `--stage-only`, or `--maintenance` are rejected.
+
+Duplicate or invalid IDs in included projects fail the build. Invalid IDs in filtered-out projects are ignored. Existing duplicate `Slurry` IDs and existing IDs absent from the filtered source are retained and reported in the result/report.
+
+The separate validation-only command remains intentionally unavailable:
+
+```powershell
+python main.py validate
 ```
 
-## Quick start
+It exits without accessing SharePoint, the local snapshot, or the production database.
 
-1) Install deps: `pip install -r requirements.txt`  
-2) Copy template: `cp config.template.json config.json` and edit paths.  
-3) Stage-only (safe default): `python main.py`  
-4) Apply to production (after reviewing `output/`): `python main.py --apply`  
-5) Maintenance cleanup: `python main.py --maintenance`
+This is not the production updater. SharePoint `c&p` acquisition, full `db_table` mapping/formulas, Excel recalculation, Cellpy qualification, and production apply remain deferred. No representative live success is claimed.
 
-## CLI
+## Governing documents
 
-- `python main.py` — stage-only run; saves modified DB copy to `output/`.
-- `--apply` — copy staged output to production DB (backs up if `auto_backup`).
-- `--skip-sharepoint` — skip fetching a fresh `Cell_Log.xlsx` from Downloads.
-- `--maintenance` — clean `output/`, old source copies (keep 5), and `__pycache__`.
+- `PROJECT_SCOPE.md` - authoritative scope and safety boundaries.
+- `IMPLEMENTATION_PLAN.md` - Stage 0 plus Gates A-E.
+- `SOURCE_CONTRACT.md` - exact source and values-only mirror contract.
+- `DB_FIELD_MAPPING.md` - complete 73-column ownership inventory.
+- `MIGRATION_DECISIONS.md` - user-approved migration decisions.
+- `IMPLEMENTATION_PLAN_ADVERSARIAL_REVIEW.md` - production-risk review.
+- `STAGE0_SAFETY_EVIDENCE.md` - evidence that legacy write paths are disabled.
 
-## Config (`config.json`)
+## Verification
 
-```json
-{
-  "projects": ["Project-A", "Project-B"],
-  "source_path": "source_data/Cell_Log.xlsx",
-  "work_dir": ".",
-  "db_path": "path/to/Cell_Analysis_db.xlsx",
-  "sheet_to_copy": "log",
-  "target_sheet": "Slurry",
-  "unique_key_col": "A",
-  "logging_format": "[{timestamp}] {message}",
-  "dry_run": true,
-  "auto_backup": true
-}
+```powershell
+python -m pytest -q
 ```
 
-- `projects`: exact project names to keep.
-- `dry_run`: pipeline logic uses stage-only unless `--apply`.
-- `auto_backup`: create timestamped backup before live apply.
-
-## Expected files
-
-- Source data: `source_data/Cell_Log.xlsx` (or newest from Downloads via SharePoint helper).  
-- Production DB: `db_path` pointing to cellpy database (do not change structure).  
-- Output (staged): `output/dryrun_<db>_<ts>.xlsx` plus optional backups.
-
-## Safety and workflow
-
-- Always inspect staged output before `--apply`.
-- Duplicate keys (column A) are skipped; existing data preserved.
-- Run maintenance periodically to keep workspace small.
-
-## Troubleshooting (fast track)
-
-- Missing source file: ensure `source_data/Cell_Log.xlsx` exists or rerun with fresh download.  
-- Target sheet missing: check `target_sheet` matches DB sheet name (default `Slurry`).  
-- File locked: close Excel and retry.  
-- No new rows: confirm project names in source match `projects` exactly.
-
-## Tests
-
-`python tests/test_refactored.py`
+Production replacement will be introduced last, only after the source, mapping, candidate, Excel/Cellpy, transaction, backup, and rollback gates pass.

@@ -1,0 +1,30 @@
+{
+  "columns": {
+    "D": {
+      "non_formula_populated": 361
+    },
+    "T": {
+      "non_formula_populated": 361
+    },
+    "X": {
+      "non_formula_populated": 361
+    }
+  },
+  "dimensions": {
+    "Slurry": "A1:CI370",
+    "db_table": "A1:BU363"
+  },
+  "formula_count": 4332,
+  "non_formula_outside_F_L": 1083,
+  "row_offset": {
+    "offset": 1,
+    "source_row": 4,
+    "source_sheet": "Slurry",
+    "target_row": 3,
+    "target_sheet": "db_table"
+  },
+  "sheet_order": [
+    "Slurry",
+    "db_table"
+  ]
+}
