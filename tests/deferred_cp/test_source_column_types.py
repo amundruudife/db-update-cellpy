@@ -1,6 +1,6 @@
 import pytest
 
-from src.source_validation import (
+from src.deferred_cp.source_validation import (
     COLUMN_ERROR_POLICIES,
     SOURCE_COLUMN_CONTRACTS,
     SourceValidationError,

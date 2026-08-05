@@ -1,7 +1,7 @@
 # Source Contract: Cell Log `c&p`
 
-Status: source rules approved; Gate A remains blocked on live-source and anomaly evidence  
-Authority: `PROJECT_SCOPE.md`  
+Status: source rules approved; Gate A remains blocked on live-source and anomaly evidence
+Authority: `../../PROJECT_SCOPE.md`
 Last revised: 2026-08-04
 
 ## Purpose

@@ -1,0 +1,3 @@
+-r requirements.txt
+pytest
+graphifyy>=0.8.36

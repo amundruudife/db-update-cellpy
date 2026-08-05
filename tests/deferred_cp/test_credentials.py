@@ -1,6 +1,6 @@
 import pytest
 
-from src.credentials import CredentialStoreError, KeyringCredentialStore
+from src.deferred_cp.credentials import CredentialStoreError, KeyringCredentialStore
 
 
 class FakeKeyring:

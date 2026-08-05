@@ -1,7 +1,7 @@
 # Implementation checkpoints
 
 Brief, test-backed notes for the first ten implementation tasks in
-`IMPLEMENTATION_PLAN.md`.
+`../../IMPLEMENTATION_PLAN.md`.
 
 ## Task 1 — Resolve the hard-coded source identity
 
@@ -132,8 +132,8 @@ Brief, test-backed notes for the first ten implementation tasks in
 The implementations use injected test doubles and do not claim a live
 SharePoint/Graph resolution, credential retrieval, or source comparison. Gate A
 remains blocked on that live evidence and the still-open anomaly decisions in
-`IMPLEMENTATION_PLAN.md`.
- 
+`../../IMPLEMENTATION_PLAN.md`.
+
 The adversarial open points above are also not
 production-readiness evidence until their artifacts and tests exist.
 

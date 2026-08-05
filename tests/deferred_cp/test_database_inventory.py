@@ -2,7 +2,7 @@ from pathlib import Path
 
 from openpyxl import Workbook
 
-from src.database_inventory import (
+from src.deferred_cp.database_inventory import (
     classify_cell,
     compare_cell_inventories,
     inventory_workbook,

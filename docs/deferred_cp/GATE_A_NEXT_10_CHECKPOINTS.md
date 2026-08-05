@@ -1,7 +1,7 @@
 # Gate A: next-ten implementation checkpoints
 
 Short red-green notes for the first ten unchecked items in
-`IMPLEMENTATION_PLAN.md`. A checkpoint is marked blocked when repository code
+`../../IMPLEMENTATION_PLAN.md`. A checkpoint is marked blocked when repository code
 is complete but an external source or approval is still required.
 
 ## Task 1 — duplicate positive IDs

@@ -2,8 +2,8 @@
 
 Status: provisional local evidence; source correction and live reconciliation still required
 
-Evidence workbook: `C:\Users\IFE13213\Downloads\Cell_Log.xlsx`  
-Evidence SHA-256: `15787AF0AEACCA6D05C8CF31129EF0F33D7554ED16C511BE656F4C00599694E1`  
+Evidence workbook: `C:\Users\IFE13213\Downloads\Cell_Log.xlsx`
+Evidence SHA-256: `15787AF0AEACCA6D05C8CF31129EF0F33D7554ED16C511BE656F4C00599694E1`
 Inspected sheet: `c&p`, evaluated values, rows 4 through 4590
 
 The updater must not choose a first or last duplicate, merge rows, renumber IDs,

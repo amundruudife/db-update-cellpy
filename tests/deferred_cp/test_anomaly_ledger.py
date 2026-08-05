@@ -1,5 +1,5 @@
-from src.anomaly_ledger import build_anomaly_ledger
-from src.contracts import KEY_COLUMN, SOURCE_COLUMN_COUNT
+from src.deferred_cp.anomaly_ledger import build_anomaly_ledger
+from src.deferred_cp.contracts import KEY_COLUMN, SOURCE_COLUMN_COUNT
 
 
 def _row(key):

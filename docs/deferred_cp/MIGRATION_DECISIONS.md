@@ -1,6 +1,6 @@
 # Migration Decisions and Required Approvals
 
-Status: user decisions recorded; technical evidence still blocks Gates A and B  
+Status: user decisions recorded; technical evidence still blocks Gates A and B
 Last revised: 2026-08-04
 
 This file separates decisions already given by the user from recommendations that still require confirmation.

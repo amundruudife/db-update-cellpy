@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from src.field_mapping import TARGET_COLUMNS, build_db_row, mapping_blockers, preserve_by_id
+from src.deferred_cp.field_mapping import TARGET_COLUMNS, build_db_row, mapping_blockers, preserve_by_id
 
 
 FIXTURES = Path(__file__).parent / "fixtures" / "gate_b"

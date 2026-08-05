@@ -1,8 +1,8 @@
 import pytest
 
-from src.source_acquisition import SourceMetadata
-from src.contracts import KEY_COLUMN, SOURCE_COLUMN_COUNT
-from src.source_manifest import (
+from src.deferred_cp.source_acquisition import SourceMetadata
+from src.deferred_cp.contracts import KEY_COLUMN, SOURCE_COLUMN_COUNT
+from src.deferred_cp.source_manifest import (
     SourceManifest,
     SourceManifestError,
     build_first_manifest,

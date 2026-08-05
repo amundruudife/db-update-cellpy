@@ -1,7 +1,7 @@
 # Adversarial Review: Hard-Coded One-Way Cell Log Update Plan
 
-Review date: 2026-08-04  
-Reviewed artifact: `IMPLEMENTATION_PLAN.md`  
+Review date: 2026-08-04
+Reviewed artifact: `../../IMPLEMENTATION_PLAN.md`
 Verdict: **NO-GO for implementation that can write production**
 
 The plan has the right safety direction, but it is not yet an executable contract. It still leaves decisions open that determine record identity, row population, field meaning, source access, and rollback safety. Those are design inputs, not details that can be resolved during implementation.

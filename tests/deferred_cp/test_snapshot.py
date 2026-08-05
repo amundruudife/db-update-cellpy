@@ -1,10 +1,10 @@
 import pytest
 from openpyxl import load_workbook
 
-from src.contracts import LOCAL_SNAPSHOT_PATH, SOURCE_SHEET_NAME
-from src import snapshot as snapshot_module
-from src.snapshot import snapshot_path, write_snapshot
-from src.source_validation import SourceValidationError
+from src.deferred_cp.contracts import LOCAL_SNAPSHOT_PATH, SOURCE_SHEET_NAME
+from src.deferred_cp import snapshot as snapshot_module
+from src.deferred_cp.snapshot import snapshot_path, write_snapshot
+from src.deferred_cp.source_validation import SourceValidationError
 
 
 def _source_rows():

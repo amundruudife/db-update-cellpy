@@ -2,22 +2,19 @@
 
 import pytest
 
-from src.contracts import (
+from src.deferred_cp.contracts import (
     BUSINESS_LAST_COLUMN,
     DATA_START_ROW,
-    DATABASE_SHEET_NAME,
     HEADER_ROW,
     KEY_COLUMN,
     LOCAL_SNAPSHOT_PATH,
-    MIRROR_SHEET_NAME,
-    PRODUCTION_DATABASE_PATH,
     SOURCE_COLUMN_COUNT,
     SOURCE_SHEET_NAME,
     SOURCE_WORKBOOK_NAME,
-    SYSTEM_VALUES,
     UNITS_ROW,
 )
-from src.source_validation import (
+from src.contracts import DATABASE_SHEET_NAME, MIRROR_SHEET_NAME, PRODUCTION_DATABASE_PATH, SYSTEM_VALUES
+from src.deferred_cp.source_validation import (
     validate_first_manifest,
     validate_manifest_continuity,
     validate_source_values,

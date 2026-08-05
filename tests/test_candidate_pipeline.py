@@ -5,6 +5,7 @@ import pytest
 from openpyxl import Workbook, load_workbook
 
 import src.candidate_pipeline as candidate_pipeline
+from src.contracts import PRODUCTION_DATABASE_PATH
 from src.candidate_pipeline import CandidateBuildError, build_candidate
 
 
@@ -303,3 +304,21 @@ def test_candidate_rejects_in_place_or_production_paths(tmp_path):
 
     with pytest.raises(CandidateBuildError, match="separate output"):
         build_candidate(source, database, database)
+
+
+def test_candidate_rejects_exact_production_database_before_access(tmp_path, monkeypatch):
+    source = tmp_path / "source.xlsx"
+    candidate = tmp_path / "candidate.xlsx"
+    accesses = []
+
+    def fail_if_accessed(*args, **kwargs):
+        accesses.append((args, kwargs))
+        raise AssertionError("production workbook must not be accessed")
+
+    monkeypatch.setattr(candidate_pipeline, "load_workbook", fail_if_accessed)
+    monkeypatch.setattr(candidate_pipeline.shutil, "copy2", fail_if_accessed)
+
+    with pytest.raises(CandidateBuildError, match="cannot read from or write to production"):
+        build_candidate(source, PRODUCTION_DATABASE_PATH, candidate)
+
+    assert accesses == []

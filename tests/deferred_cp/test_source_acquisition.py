@@ -1,7 +1,7 @@
 import pytest
 
-from src.contracts import SHAREPOINT_WORKBOOK_URL
-from src.source_acquisition import (
+from src.deferred_cp.contracts import SHAREPOINT_WORKBOOK_URL
+from src.deferred_cp.source_acquisition import (
     acquire_and_stage_snapshot,
     acquire_source,
     NonPersistentWorkbookSession,

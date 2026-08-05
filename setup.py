@@ -34,8 +34,7 @@ setup(
     author_email="",
     packages=find_packages(),
     install_requires=[
-        "pandas>=1.3.0",
-        "openpyxl>=3.0.0",
+        "openpyxl>=3.1.5",
     ],
     python_requires=">=3.7",
     entry_points={
@@ -71,4 +70,4 @@ if __name__ == "__main__":
 
 # Post-install directory creation (simplified)
 print("\n📁 Creating required directories...")
-create_directories() 
+create_directories()

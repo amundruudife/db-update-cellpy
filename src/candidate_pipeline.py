@@ -20,7 +20,7 @@ from typing import Iterable
 from openpyxl import load_workbook
 
 from .contracts import (
-    DATA_START_ROW as MIRROR_DATA_START_ROW,
+    SLURRY_DATA_START_ROW as MIRROR_DATA_START_ROW,
     DATABASE_SHEET_NAME,
     MIRROR_SHEET_NAME,
     SYSTEM_VALUES,

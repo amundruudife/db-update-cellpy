@@ -1,6 +1,6 @@
 # Stage 0 Safety Evidence
 
-Date: 2026-08-04  
+Date: 2026-08-04
 Result: passed
 
 ## Controls established

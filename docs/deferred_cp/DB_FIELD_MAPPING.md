@@ -1,8 +1,8 @@
 # Database Field Mapping Contract
 
-Status: executable draft; Gate B remains blocked by the blockers below  
-Target: `C:\Users\IFE13213\cellpy_data\db\2025_Cell_Analysis_db_001.xlsx`, sheet `db_table`  
-Mirror: sheet `Slurry`, values-only `c&p`  
+Status: executable draft; Gate B remains blocked by the blockers below
+Target: `C:\Users\IFE13213\cellpy_data\db\2025_Cell_Analysis_db_001.xlsx`, sheet `db_table`
+Mirror: sheet `Slurry`, values-only `c&p`
 Last revised: 2026-08-05
 
 The executable dictionary is in `src/field_mapping.py`; exact-layout fixtures

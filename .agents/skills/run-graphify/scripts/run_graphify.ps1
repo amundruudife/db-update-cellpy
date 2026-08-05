@@ -20,13 +20,13 @@ if (-not (Test-Path -LiteralPath $python)) {
 
 switch ($Mode) {
     'update' {
-        $cliArgs = @($projectRoot, '--update')
+        $cliArgs = @('update', $projectRoot)
     }
     'full' {
-        $cliArgs = @($projectRoot)
+        $cliArgs = @('extract', $projectRoot)
     }
     'cluster-only' {
-        $cliArgs = @($projectRoot, '--cluster-only')
+        $cliArgs = @('cluster-only', $projectRoot)
     }
     'query' {
         if ([string]::IsNullOrWhiteSpace($Question)) {
