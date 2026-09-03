@@ -35,6 +35,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "openpyxl>=3.1.5",
+        "keyring>=24.0",
+        'pywin32>=312; sys_platform == "win32"',
     ],
     python_requires=">=3.7",
     entry_points={

@@ -4,6 +4,8 @@ from src.deferred_cp.contracts import SHAREPOINT_WORKBOOK_URL
 from src.deferred_cp.source_acquisition import (
     acquire_and_stage_snapshot,
     acquire_source,
+    GraphWorkbookProvider,
+    GraphRequestError,
     NonPersistentWorkbookSession,
     ReadOnlyGraphResolver,
     resolve_source_identity,
@@ -11,6 +13,13 @@ from src.deferred_cp.source_acquisition import (
     SourceChangedError,
     write_source_manifest,
 )
+
+
+def test_sharepoint_url_is_the_token_free_canonical_identity():
+    assert SHAREPOINT_WORKBOOK_URL == (
+        "https://ifecloud.sharepoint.com/sites/UsersofIFEBatteryLab/"
+        "General/00_Logs/Cell_Log.xlsx"
+    )
 
 
 def test_authentication_failure_preserves_accepted_snapshot_and_production(tmp_path):
@@ -157,7 +166,9 @@ def test_graph_resolver_exposes_only_read_requests():
 
         def get(self, url, headers):
             self.calls.append((url, headers))
-            if url.endswith("/driveItem"):
+            if "/sites/ifecloud.sharepoint.com:/" in url:
+                return {"id": "site-789"}
+            if "/drive/root:/" in url:
                 return {
                     "id": "item-123",
                     "parentReference": {"driveId": "drive-456"},
@@ -172,8 +183,16 @@ def test_graph_resolver_exposes_only_read_requests():
 
     assert identity.item_id == "item-123"
     assert used_range["address"] == "c&p!A1:S4590"
-    assert len(transport.calls) == 2
+    assert len(transport.calls) == 3
+    assert transport.calls[0][0].endswith(
+        "/sites/ifecloud.sharepoint.com:/sites/UsersofIFEBatteryLab"
+    )
+    assert transport.calls[1][0].endswith(
+        "/sites/site-789/drive/root:/General/00_Logs/Cell_Log.xlsx"
+    )
     assert all(call[1]["Authorization"] == "Bearer token" for call in transport.calls)
+    shares_route = "/" + "shares" + "/"
+    assert not any(shares_route in call[0] for call in transport.calls)
     assert not any(hasattr(resolver, method) for method in ("post", "put", "patch", "delete"))
 
 
@@ -208,6 +227,36 @@ def test_workbook_session_is_non_persistent_and_closes_after_read():
         ("read", "session-123", "c&p", "c&p!A1:S2"),
         ("close", "session-123"),
     ]
+
+
+def test_graph_workbook_provider_uses_non_persistent_read_session():
+    class GraphTransport:
+        def __init__(self):
+            self.calls = []
+
+        def post(self, url, headers=None, json_body=None):
+            self.calls.append(("post", url, headers, json_body))
+            return {"id": "session-123"}
+
+        def get(self, url, headers=None):
+            self.calls.append(("get", url, headers))
+            return {"values": [[101, "ok"]]}
+
+    transport = GraphTransport()
+    provider = GraphWorkbookProvider(transport, access_token="token")
+    session = NonPersistentWorkbookSession(provider, "drive-456", "item-123")
+
+    with session as active:
+        assert active.read_values("c&p", "c&p!A1:S2") == [[101, "ok"]]
+
+    assert transport.calls[0][0] == "post"
+    assert transport.calls[0][3] == {"persistChanges": False}
+    assert transport.calls[0][2]["Authorization"] == "Bearer token"
+    assert transport.calls[1][0] == "get"
+    assert "range(address='A1%3AS2')" in transport.calls[1][1]
+    assert transport.calls[1][2]["workbook-session-id"] == "session-123"
+    assert transport.calls[2][0] == "post"
+    assert transport.calls[2][2]["workbook-session-id"] == "session-123"
 
 
 class _VersionedResolver:
@@ -257,10 +306,81 @@ def test_acquire_source_rejects_a_changed_etag_after_read():
 
 def test_acquire_source_returns_values_when_source_metadata_is_unchanged():
     resolver = _VersionedResolver(['"etag-1"', '"etag-1"'])
-    session = _ReadSession([["evaluated"]])
+    values = [[None] * 19 for _ in range(4590)]
+    session = _ReadSession(values)
 
-    metadata, values = acquire_source(resolver, lambda metadata: session)
+    metadata, returned_values = acquire_source(resolver, lambda metadata: session)
 
     assert metadata.etag == '"etag-1"'
-    assert values == [["evaluated"]]
+    assert returned_values == values
     assert session.closed
+
+
+@pytest.mark.parametrize("row_count", [4589, 4591], ids=["one-row-short", "one-row-extra"])
+def test_acquire_source_rejects_values_with_wrong_terminal_row_count(row_count):
+    resolver = _VersionedResolver(['"etag-1"', '"etag-1"'])
+    session = _ReadSession([[None] * 19 for _ in range(row_count)])
+
+    with pytest.raises(ValueError, match="expected 4590"):
+        acquire_source(resolver, lambda metadata: session)
+
+    assert session.closed
+
+
+@pytest.mark.parametrize(
+    "address",
+    ["c&p!A1:S", "c&p!A1:R2", "c&p!A1:S0"],
+    ids=["missing-terminal-row", "wrong-terminal-column", "zero-terminal-row"],
+)
+def test_acquire_source_rejects_malformed_terminal_range(address):
+    class Resolver(_VersionedResolver):
+        def read_used_range(self, identity, sheet_name):
+            return {"sheetName": "c&p", "address": address}
+
+    session = _ReadSession([[None] * 19])
+    with pytest.raises(ValueError, match="used-range address"):
+        acquire_source(Resolver(['"etag-1"', '"etag-1"']), lambda metadata: session)
+    assert session.closed is False
+
+
+def test_acquire_source_rejects_malformed_terminal_row_and_closes_session():
+    resolver = _VersionedResolver(['"etag-1"', '"etag-1"'])
+    session = _ReadSession([[None] * 18 for _ in range(4590)])
+
+    with pytest.raises(ValueError, match="malformed c&p rows"):
+        acquire_source(resolver, lambda metadata: session)
+
+    assert session.closed
+
+
+def test_acquire_and_stage_snapshot_preserves_snapshot_and_cleans_cardinality_temp(tmp_path):
+    accepted = tmp_path / "source_data" / "Cell_Log_CP.xlsx"
+    accepted.parent.mkdir()
+    accepted.write_bytes(b"accepted")
+    resolver = _VersionedResolver(['"etag-1"', '"etag-1"'])
+    session = _ReadSession([[None] * 19])
+
+    with pytest.raises(ValueError, match="expected 4590"):
+        acquire_and_stage_snapshot(resolver, lambda metadata: session, root=tmp_path)
+
+    assert session.closed
+    assert accepted.read_bytes() == b"accepted"
+    assert not list(accepted.parent.glob(".Cell_Log_CP.*"))
+
+
+def test_graph_resolver_fails_closed_for_missing_site_or_item_identity():
+    class MissingSite:
+        def get(self, url, headers=None):
+            return {}
+
+    with pytest.raises(GraphRequestError, match="site identity"):
+        ReadOnlyGraphResolver(MissingSite(), "token").resolve_drive_item(SHAREPOINT_WORKBOOK_URL)
+
+    class MissingItem:
+        def get(self, url, headers=None):
+            if "/drive/root:/" in url:
+                return {"id": "item"}
+            return {"id": "site"}
+
+    with pytest.raises(ValueError, match="drive item identity"):
+        resolve_source_identity(ReadOnlyGraphResolver(MissingItem(), "token"))

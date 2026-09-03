@@ -86,13 +86,13 @@ Alternative: map source channel to `tester`, or populate both under a documented
 
 **Decision:** Approved recommendation. Map `c&p.B channel` to `db_table.AW channel`. Preserve existing `tester` by ID and leave it blank for new IDs unless later Cellpy evidence establishes a deterministic rule.
 
-### Q8 — Is delegated Microsoft Graph `Files.ReadWrite` acceptable?
+### Q8 — Is delegated Microsoft Graph `Sites.Read.All` acceptable?
 
-**Recommended:** only if the responsible SharePoint/security owner explicitly accepts the write-capable delegated permission, the code uses a non-persistent workbook session, contains no update request, and verifies source identity before and after retrieval.
+**Recommended:** only if the responsible SharePoint/security owner explicitly approves the delegated read-only permission, the code uses a non-persistent workbook session, contains no update request, and verifies source identity before and after retrieval.
 
 If not acceptable, require an approved upstream process to publish the standalone values-only `c&p` snapshot.
 
-**Decision:** Approved for the simplest working implementation, conditional on a non-persistent session, no update requests, fixed source identity, and before/after source metadata checks. The updater must not modify Cell Log.
+**Decision:** Approved for the simplest working implementation, conditional on `Sites.Read.All`, a non-persistent session, no update requests, fixed source identity, and before/after source metadata checks. The updater must not modify Cell Log; revoke the superseded old sharing link before live acceptance.
 
 ## Technical questions to resolve from evidence
 

@@ -12,7 +12,7 @@ Define the only permitted source and the exact values-only local mirror used by 
 
 | Item | Contract |
 |---|---|
-| SharePoint workbook URL | `https://ifecloud.sharepoint.com/:x:/r/sites/UsersofIFEBatteryLab/_layouts/15/Doc.aspx?sourcedoc=%7BEED439B5-B14D-42A0-B992-AE5F08CC1F02%7D&file=Cell_Log.xlsx&action=default&mobileredirect=true&DefaultItemOpen=1` |
+| SharePoint identity | host `ifecloud.sharepoint.com`; site path `sites/UsersofIFEBatteryLab`; default-drive item `General/00_Logs/Cell_Log.xlsx` |
 | Workbook | `Cell_Log.xlsx` |
 | Source sheet | `c&p` (case-sensitive) |
 | Local snapshot | `source_data/Cell_Log_CP.xlsx` |
@@ -105,7 +105,7 @@ The legacy project filter is not retained because the approved source surface `c
 - No source update request is permitted in code.
 - Authentication or retrieval failure aborts. Downloads and cached-source fallbacks are prohibited.
 - Each retrieval records immutable drive item identity, eTag, last-modified timestamp, used-range address, retrieval time, and content hash.
-- Microsoft Graph delegated access is approved for the simplest working implementation, even if it requires `Files.ReadWrite`, only when the session is non-persistent, the code contains no update request, and source metadata is checked before and after retrieval.
+- Microsoft Graph delegated `Sites.Read.All` access is required. Resolution performs the exact site lookup followed by the default-drive item lookup with authorization headers; sharing-link `/shares` fallback is prohibited. Operationally revoke the superseded old sharing link before live acceptance.
 
 ## Snapshot acceptance
 
@@ -117,7 +117,7 @@ A new snapshot is accepted only when:
 - [ ] mapping-critical columns contain no Excel errors;
 - [ ] source manifest changes satisfy the append-only policy;
 - [ ] the temporary snapshot reopens successfully and matches its manifest; and
-- [ ] atomic replacement of the prior local snapshot succeeds.
+- [ ] ordered replacement of the prior local snapshot succeeds (restart-recoverable; not a multi-file/power-loss atomic claim).
 
 Failure preserves the last accepted snapshot and leaves production unchanged.
 

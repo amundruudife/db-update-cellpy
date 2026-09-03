@@ -1,9 +1,7 @@
-from types import SimpleNamespace
-
 import pytest
 
 import main
-from src.candidate_pipeline import CandidateBuildError
+from src.candidate_pipeline import CandidateBuildError, CandidateReport
 
 
 def _candidate_args(*extra):
@@ -21,9 +19,13 @@ def _candidate_args(*extra):
 
 def test_candidate_forwards_arguments_and_prints_summary(monkeypatch, capsys):
     calls = []
-    report = SimpleNamespace(
+    report = CandidateReport(
+        source_path="source.xlsx",
+        database_path="database.xlsx",
         candidate_path="candidate.xlsx",
+        source_rows=5,
         filtered_rows=5,
+        existing_slurry_rows=2,
         retained_ids=(101, 102),
         new_ids=(103, 104, 105),
         absent_existing_ids=(99,),
@@ -43,7 +45,7 @@ def test_candidate_forwards_arguments_and_prints_summary(monkeypatch, capsys):
     assert calls == [
         (
             ("source.xlsx", "database.xlsx", "candidate.xlsx"),
-            {"report_path": "candidate.json"},
+            {"report_path": "candidate.json", "cellpy_ready": False},
         )
     ]
     assert "candidate.xlsx" in captured.out
@@ -53,6 +55,93 @@ def test_candidate_forwards_arguments_and_prints_summary(monkeypatch, capsys):
     assert "absent=1" in captured.out
     assert "existing duplicates=2" in captured.out
     assert captured.err == ""
+
+
+def test_candidate_forwards_cellpy_ready(monkeypatch, capsys):
+    calls = []
+    report = CandidateReport(
+        source_path="source.xlsx",
+        database_path="database.xlsx",
+        candidate_path="candidate.xlsx",
+        source_rows=1,
+        filtered_rows=1,
+        existing_slurry_rows=0,
+        retained_ids=(),
+        new_ids=(303,),
+        absent_existing_ids=(),
+        existing_duplicate_ids=(),
+        cellpy_ready=True,
+        recalculated=True,
+    )
+
+    def fake_build_candidate(*args, **kwargs):
+        calls.append((args, kwargs))
+        return report
+
+    monkeypatch.setattr(main, "build_candidate", fake_build_candidate, raising=False)
+
+    result = main.main(_candidate_args("--cellpy-ready"))
+
+    assert result == 0
+    assert calls == [
+        (
+            ("source.xlsx", "database.xlsx", "candidate.xlsx"),
+            {"report_path": None, "cellpy_ready": True},
+        )
+    ]
+    assert "cellpy-ready=True" in capsys.readouterr().out
+
+
+def test_candidate_forwards_neware_source_and_manifest(monkeypatch, capsys):
+    calls = []
+    report = CandidateReport(
+        source_path="source.xlsx",
+        database_path="database.xlsx",
+        candidate_path="candidate.xlsx",
+        source_rows=1,
+        filtered_rows=1,
+        existing_slurry_rows=0,
+        retained_ids=(),
+        new_ids=(),
+        absent_existing_ids=(),
+        existing_duplicate_ids=(),
+        neware_source_path="neware.xlsx",
+        neware_manifest_path="manifest.json",
+        neware_source_rows=39,
+        neware_usable_rows=37,
+        neware_placeholder_rows=(3, 4),
+        neware_new_ids=tuple(range(102, 139)),
+    )
+
+    def fake_build_candidate(*args, **kwargs):
+        calls.append((args, kwargs))
+        return report
+
+    monkeypatch.setattr(main, "build_candidate", fake_build_candidate, raising=False)
+
+    result = main.main(
+        _candidate_args(
+            "--neware-source",
+            "neware.xlsx",
+            "--neware-manifest",
+            "manifest.json",
+        )
+    )
+
+    assert result == 0
+    assert calls == [
+        (
+            ("source.xlsx", "database.xlsx", "candidate.xlsx"),
+            {
+                "report_path": None,
+                "cellpy_ready": False,
+                "neware_source_path": "neware.xlsx",
+                "neware_manifest_path": "manifest.json",
+            },
+        )
+    ]
+    output = capsys.readouterr().out
+    assert "Neware: usable=37; new=37; retained=0; placeholders=2" in output
 
 
 def test_candidate_requires_source_database_and_output():
@@ -80,7 +169,9 @@ def test_candidate_reports_build_failure_to_stderr(monkeypatch, capsys):
 
     captured = capsys.readouterr()
     assert result == 1
-    assert calls == [(tuple(_candidate_args()[2::2]), {"report_path": None})]
+    assert calls == [
+        (tuple(_candidate_args()[2::2]), {"report_path": None, "cellpy_ready": False})
+    ]
     assert captured.out == ""
     assert captured.err == "Candidate build failed: unsafe workbook\n"
 

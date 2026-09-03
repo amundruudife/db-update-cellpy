@@ -3,12 +3,14 @@
 from pathlib import Path
 
 
+SHAREPOINT_HOSTNAME = "ifecloud.sharepoint.com"
+SHAREPOINT_SITE_PATH = "sites/UsersofIFEBatteryLab"
+SHAREPOINT_DEFAULT_DRIVE_ITEM_PATH = "General/00_Logs/Cell_Log.xlsx"
+# This token-free URL is evidence metadata only. Resolution uses the Graph
+# site and default-drive item endpoints, never a sharing link.
 SHAREPOINT_WORKBOOK_URL = (
-    "https://ifecloud.sharepoint.com/:x:/r/sites/UsersofIFEBatteryLab/"
-    "_layouts/15/Doc.aspx?"
-    "sourcedoc=%7BEED439B5-B14D-42A0-B992-AE5F08CC1F02%7D"
-    "&file=Cell_Log.xlsx&action=default&mobileredirect=true"
-    "&DefaultItemOpen=1"
+    f"https://{SHAREPOINT_HOSTNAME}/{SHAREPOINT_SITE_PATH}/"
+    f"{SHAREPOINT_DEFAULT_DRIVE_ITEM_PATH}"
 )
 SOURCE_WORKBOOK_URL = SHAREPOINT_WORKBOOK_URL
 SOURCE_WORKBOOK_NAME = "Cell_Log.xlsx"
